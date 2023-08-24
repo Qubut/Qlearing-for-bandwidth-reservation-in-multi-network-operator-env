@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "q-learing-for-bandwidth-reservation-in-multi-network-operator-env"
+version = "0.1.0"
+description = ""
+authors = ["Qubut <qubut@tutanota.com>"]
+readme = "README.md"
+packages = [{include = "q_learing_for_bandwidth_reservation_in_multi_network_operator_env"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
