@@ -8,6 +8,10 @@ packages = [{include = "q_learing_for_bandwidth_reservation_in_multi_network_ope
 
 [tool.poetry.dependencies]
 python = "^3.11"
+torch = "^2.0.1"
+tianshou = "^0.5.1"
+gym = "^0.26.2"
+pandas = "^2.1.0"
 
 
 [build-system]
