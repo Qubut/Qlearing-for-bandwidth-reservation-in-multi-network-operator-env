@@ -1,3 +1,4 @@
+from functools import lru_cache
 import time
 from typing import Any, Dict, Tuple
 from matplotlib import pyplot as plt
@@ -50,62 +51,62 @@ class BookingEnv(gym.Env):
         self.prediction_model = prediction_model
         self.device = device
 
-        self.current_timestamp = from_timestamp
         self.large_penalty = -50
         self.large_reward = 50
-        self.num_providers = len(self._predict_prices()[0])
+        all_prices = self._predict_prices()
+        self.global_min_price = np.min(all_prices)
+        self.global_min_price_index = np.argmin(all_prices)
+        initial_prices = self._predict_prices()[0]
+        self.num_providers = len(initial_prices)
         self.action_space = spaces.Discrete(self.num_providers + 1)
         self.observation_space = spaces.Box(
             low=0, high=100, shape=(self.num_providers,), dtype=np.float32
         )
-        self.done = False
-        self.best_offer_info = {
-            "price": float("inf"),
-            "provider": None,
-            "timestamp": None,
-        }
 
+        self.predictions_iterator = iter(self._predict_prices())
+
+        self.current_timestamp = from_timestamp
+        self.best_offer_info = {"price": float("inf"), "provider": None, "timestamp": None}
+        self.done = False
+
+    @lru_cache(maxsize=1)
     def _predict_prices(self) -> np.ndarray:
-        return (
-            get_prices_predictions(
-                self.prediction_model,
-                (self.current_timestamp, self.to_timestamp, self.step_seconds),
-                self.device,
-            )
-            .cpu()
-            .numpy()
-        )
+        return get_prices_predictions(
+            self.prediction_model,
+            (self.from_timestamp, self.to_timestamp, self.step_seconds),
+            self.device
+        ).cpu().numpy()
 
     def reset(self) -> np.ndarray:
         self.current_timestamp = self.from_timestamp
         self.done = False
-        self.best_offer_info = {
-            "price": float("inf"),
-            "provider": None,
-            "timestamp": None,
-        }
-        return self._predict_prices()[0]
+        self.best_offer_info = {"price": float("inf"), "provider": None, "timestamp": None}
+        return next(self.predictions_iterator)
 
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, Dict]:
-        current_prices = self._predict_prices()[0]
-        min_price = np.min(current_prices)
-        min_price_index = np.argmin(current_prices)
+        try:
+            current_prices = next(self.predictions_iterator)
+        except StopIteration:
+            self.done = True
+            current_prices = np.zeros(self.num_providers)
 
         if action < self.num_providers:
             chosen_price = current_prices[action]
-            if action == min_price_index:
+            
+            if action == self.global_min_price_index:
                 reward = self.large_reward
             else:
-                reward = min_price - chosen_price
+                reward = self.global_min_price - chosen_price
             self.done = True
+            
         elif action == self.num_providers:
-            self.current_timestamp += pd.Timedelta(seconds=self.step_seconds)
             elapsed_time = time.time() - self.start_time
-            if self.current_timestamp >= self.to_timestamp:
+            if elapsed_time > self.decision_time_seconds:
                 reward = self.large_penalty
                 self.done = True
             else:
                 reward = -np.exp(0.01 * elapsed_time)
+
         return current_prices, reward, self.done, {}
 
     def render(self, mode: str = "human") -> None:

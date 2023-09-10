@@ -5,13 +5,53 @@ This is deep reinforcement learning (DRL) project for booking simulation, where 
 The project utilizes the Tianshou library for reinforcement learning and PyTorch for neural network modeling.
 
 ## Table of Contents
-
+- [Environment](#environment)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Structure](#structure)
 - [Training](#training)
 - [Results](#results)
 - [License](#license)
+
+## Environment
+
+
+### `BookingEnv`: A Reinforcement Learning Framework for Price Predictions
+
+The `BookingEnv` environment simulates the dynamics of price predictions from various providers over a temporal sequence, aiming to guide reinforcement learning agents towards optimal booking decisions.
+
+#### Environment Components:
+
+1. **Timeline**:
+   - The environment operates over a temporal sequence $\( T \)$, where $\( T \)$ spans from `from_timestamp` to `to_timestamp`.
+   - Predicted prices are updated at intervals $\( \Delta t \)$ defined by `step_seconds`.
+
+2. **Prediction Model**:
+   - The environment uses a predictive model, `prediction_model`, that forecasts the price matrix $\( P \)$ where each entry $\( P_{i,j} \)$ represents the predicted price from provider $\( i \)$ at time $\( j \)$ of the timeline.
+
+3. **Agent's Decisions**:
+   - At each time $\( t \)$, the agent observes the vector $\( P_{., t} \)$ (the predicted prices from all providers at time $\( t \)$) and decides:
+     - To accept a price from a provider, resulting in action $\( a \)$ where $\( 0 \leq a < \text{num_providers} \)$.
+     - To wait for future offers, represented by action $\( a = \text{num_providers} \)$.
+
+4. **Reward Function** $\( R(a, t) \)$:
+   - If the agent chooses a price from provider $\( a \)$ at time $\( t \)$:
+     - $\( R(a, t) = \text{large_reward} \)$ if $\( P_{a, t} = \min(P_{., t}) \)$.
+     - Otherwise, $\( R(a, t) = \min(P_{., t}) - P_{a, t} \)$.
+   - If the agent decides to wait, the reward evolves with elapsed time $\( \tau \): \( R(\text{num_providers}, \tau) = -\exp(0.01 \times \tau) \)$.
+   - Exceeding the decision window results in $\( R(a, t) = \text{large_penalty} \)$.
+
+#### Visualization:
+
+- The `render` method graphically represents the matrix $\( P \)$, allowing users to visualize the temporal evolution of prices across providers.
+
+#### Termination:
+
+- An episode concludes, setting the `done` flag to `True`, either when the timeline reaches its terminal state or post a booking decision by the agent.
+
+---
+
+The `BookingEnv` environment mathematically formalizes the problem of making informed booking decisions under the guidance of future price predictions, positioning itself as a crucial tool for scenarios where optimal decisions are paramount.
 
 
 ## Installation
