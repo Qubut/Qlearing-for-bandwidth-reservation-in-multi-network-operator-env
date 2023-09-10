@@ -39,7 +39,9 @@ The `BookingEnv` environment simulates the dynamics of price predictions from va
      $R(a, t) = \text{large_reward}$ if $P_{a, t} = \min(P_{., t})$.
      Otherwise, $R(a, t) = \min(P_{., t}) - P_{a, t}$.
    If the agent decides to wait, the reward evolves with elapsed time 
-   $$\tau:R(\text{num_providers}, \tau) = -\exp(0.01 \times \tau)$$.
+   ```math
+   \tau:R(\text{num_providers}, \tau) = -\exp(0.01 \times \tau)
+   ```
    Exceeding the decision window results in $R(a, t) = \text{large_penalty}$.
 
 #### Visualization:
