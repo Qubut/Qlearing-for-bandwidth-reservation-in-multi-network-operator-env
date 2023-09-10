@@ -51,7 +51,7 @@ cd ./q_learing_for_bandwidth_reservation_in_multi_network_operator_env
 poetry run python main.py
 
 ```
-or if have the pkgs without poetry installed 
+or if you have installed the pkgs without poetry 
 
 ```bash
 cd ./q_learing_for_bandwidth_reservation_in_multi_network_operator_env
