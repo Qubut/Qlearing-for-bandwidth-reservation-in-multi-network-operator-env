@@ -40,7 +40,7 @@ The `BookingEnv` environment simulates the dynamics of price predictions from va
      Otherwise, $R(a, t) = \min(P_{., t}) - P_{a, t}$.
    If the agent decides to wait, the reward evolves with elapsed time 
    
-   $$R(a, t) = -\exp(\alpha \times t)$$
+   $$R(a, t) = -\exp(\alpha \cdot t)$$
    where $\alpha$ is a hyperparameter set to $0.01$ in the code
    Exceeding the decision window results in $R(a, t)=$ `large_penalty`.
 
