@@ -31,18 +31,18 @@ The `BookingEnv` environment simulates the dynamics of price predictions from va
 
 3. **Agent's Decisions**:
    - At each time $t$, the agent observes the vector $P_{., t}$ (the predicted prices from all providers at time $t$ and decides):
-     - To accept a price from a provider, resulting in action $a$ where $0 \leq a < \text{num_providers}$.
-     - To wait for future offers, represented by action $a = \text{num_providers}$.
+     - To accept a price from a provider, resulting in action $a$ where $0 \leq a <$ `num_providers`.
+     - To wait for future offers, represented by action $a=$ `num_providers`.
 
 4. **Reward Function** $R(a, t)$:
    If the agent chooses a price from provider $a$ at time $t$:
-     $R(a, t) = \text{large_reward}$ if $P_{a, t} = \min(P_{., t})$.
+     $R(a, t)=$ `large_reward` if $P_{a, t} = \min(P_{., t})$.
      Otherwise, $R(a, t) = \min(P_{., t}) - P_{a, t}$.
    If the agent decides to wait, the reward evolves with elapsed time 
-   ```math
-   \tau:R(\text{num_providers}, \tau) = -\exp(0.01 \times \tau)
-   ```
-   Exceeding the decision window results in $R(a, t) = \text{large_penalty}$.
+   
+   $$R(a, t) = -\exp(\alpha \times t)$$
+   where $\alpha$ is a hyperparameter set to $0.01$ in the code
+   Exceeding the decision window results in $R(a, t)=$ `large_penalty`.
 
 #### Visualization:
 
